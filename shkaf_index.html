@@ -35,7 +35,7 @@
       min-height: 100vh;
     }
 
-    /* “телефон” 375×812 */
+    /* "Телефон" 375×812 */
     .phone {
       position: relative;
       width: 375px;
@@ -50,7 +50,7 @@
       left: 0;
       top: 0;
       width: 100%;
-      height: 144px;
+      height: 144px; /* серый верх, как на макете */
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
@@ -107,7 +107,7 @@
       border-left-color: transparent;
     }
 
-    /* Шкаф 375×518, по центру */
+    /* Шкаф: 375×518, строго по центру */
     .wardrobe-wrapper {
       position: absolute;
       left: 0;
@@ -120,10 +120,11 @@
       width: 100%;
       height: 100%;
       display: block;
+      border-radius: 0;
       object-fit: cover;
     }
 
-    /* Три белые кнопки слева по шкафу */
+    /* Три белые кнопки слева (привязаны к шкафу) */
     .side-button {
       position: absolute;
       width: 30px;
@@ -137,10 +138,10 @@
       z-index: 15;
     }
 
-    /* Координаты внутри шкафа (подогнаны под макет) */
-    .side-button-1 { left: 64px; top: 180px; }
+    /* координаты относительно ЛЕВОГО ВЕРХНЕГО УГЛА ШКАФА (top:144) */
+    .side-button-1 { left: 64px; top: 180px; }  /* на уровне верхней одежды */
     .side-button-2 { left: 64px; top: 255px; }
-    .side-button-3 { left: 64px; top: 360px; }
+    .side-button-3 { left: 64px; top: 360px; }  /* низ, как в макете */
 
     .side-button:hover {
       transform: scale(1.1);
@@ -152,13 +153,17 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    /* Контейнер Пушика (по твоим пикселям) */
+    /* Контейнер под 3D-монстра
+       ВНИМАНИЕ: размеры и позиция по ТВОИМ цифрам
+       ширина 187, высота 280
+       отступ слева 96, сверху 304 от всего экрана 375×812
+    */
     .monster-container {
       position: absolute;
-      left: 96px;    /* отступ слева от экрана */
-      top: 304px;    /* отступ сверху от экрана */
-      width: 187px;  /* ширина области монстра */
-      height: 280px; /* высота области монстра */
+      left: 96px;
+      top: 304px;
+      width: 187px;
+      height: 280px;
       pointer-events: none;
       z-index: 20;
       overflow: visible;
@@ -170,7 +175,7 @@
       display: block;
     }
 
-    /* Нижняя панель */
+    /* Нижняя панель с монеткой */
     .bottom-panel {
       position: absolute;
       left: 0;
@@ -218,7 +223,7 @@
       cursor: pointer;
     }
 
-    /* Модалка */
+    /* Модалка “откроется на 5 уровне” */
     .modal {
       position: absolute;
       inset: 0;
@@ -292,15 +297,16 @@
     <div class="wardrobe-wrapper">
       <img src="wardrobe.png" alt="Шкаф" class="wardrobe-image" />
 
+      <!-- три круглых кнопки слева -->
       <button class="side-button side-button-1" id="sideButton1"></button>
       <button class="side-button side-button-2" id="sideButton2"></button>
       <button class="side-button side-button-3" id="sideButton3"></button>
     </div>
 
-    <!-- Пушик -->
+    <!-- Контейнер монстра -->
     <div class="monster-container" id="monsterContainer"></div>
 
-    <!-- Нижняя панель -->
+    <!-- Нижняя плашка -->
     <div class="bottom-panel">
       <button class="coin-button" id="coinButton">
         <span class="coin-text">30</span>
@@ -321,7 +327,7 @@
     </div>
   </div>
 
-  <!-- JS -->
+  <!-- JS: three.js + логика -->
   <script type="module">
     /***********************
      * Импорты three.js
@@ -331,7 +337,7 @@
     import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 
     /***********************
-     * DOM
+     * DOM-элементы
      ***********************/
     const backButton = document.getElementById("backButton");
     const hangerButton = document.getElementById("hangerButton");
@@ -347,7 +353,7 @@
     const modalCloseButton = document.getElementById("modalCloseButton");
 
     /***********************
-     * UI
+     * Обработчики интерфейса
      ***********************/
     backButton.addEventListener("click", () => {
       window.location.href =
@@ -419,7 +425,7 @@
     scene.add(dirLight);
 
     /***********************
-     * Загрузка Пушика (GLB + Draco)
+     * Загрузка DRACO + GLB-модели
      ***********************/
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath(
@@ -438,32 +444,22 @@
       (gltf) => {
         monster = gltf.scene;
 
-        // --- нормализация модели ---
+        // Нормализуем модель: центр в (0,0,0), масштаб по высоте
         const box = new THREE.Box3().setFromObject(monster);
         const size = new THREE.Vector3();
         box.getSize(size);
         const center = new THREE.Vector3();
         box.getCenter(center);
 
-        // переносим центр модели в (0,0,0)
         monster.position.sub(center);
 
-        // --- НАСТРОЙКИ РАЗМЕРА ПУШИКА ---
-        const baseTargetHeight = 0.9;      // базовая высота в мире
-        const scaleFactor = 0.8;           // доп. коэффициент (меньше = меньше)
-        const baseScale = baseTargetHeight / size.y;
+        const targetHeight = 1.2; // "рост" монстра в мировых координатах
+        const scale = targetHeight / size.y;
+        monster.scale.setScalar(scale);
 
-        const worldHeight = baseTargetHeight * scaleFactor;
-        monster.scale.setScalar(baseScale * scaleFactor);
+        // Опустить так, чтобы стоял "на полке"
+        monster.position.y = -targetHeight / 2 + 1.3;
 
-        // ставим так, чтобы стоял на полке и не вылезал из верха
-        const offsetY = 0.22;              // можно крутить: больше -> выше, меньше -> ниже
-        monster.position.y = -worldHeight / 2 + offsetY;
-
-        // при желании сдвинуть влево/вправо:
-        // monster.position.x = 0.0;
-
-        // --------------------------------
         monster.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = false;
@@ -472,7 +468,7 @@
         });
 
         scene.add(monster);
-        console.log("Модель пушика успешно загружена");
+        console.log("Модель монстрика успешно загружена");
       },
       undefined,
       (error) => {
@@ -481,7 +477,7 @@
     );
 
     /***********************
-     * Анимация
+     * Анимация — монстрик крутится по Y
      ***********************/
     function animate() {
       requestAnimationFrame(animate);
