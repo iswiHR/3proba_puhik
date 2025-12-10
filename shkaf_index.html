@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <title>Монстрик в шкафу</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 
   <style>
     * {
@@ -25,7 +26,7 @@
     }
 
     .app {
-      max-width: 375px;           /* ширина айфона */
+      max-width: 375px;     /* ширина айфона */
       width: 100%;
       min-height: 100vh;
       background: #f5f5f7;
@@ -124,10 +125,11 @@
       width: 100%;
     }
 
-    /* -------------------------------
-       КАРТИНКА ШКАФА
-       ЗАГРУЗИ images/wardrobe.png
-       -------------------------------- */
+    /* КАРТИНКА ШКАФА
+       !!! ВАЖНО !!!
+       Файл должен лежать рядом с этим .html и называться:
+       wardrobe.png
+    */
 
     .wardrobe-image {
       display: block;
@@ -139,13 +141,13 @@
 
     .monster-wrapper {
       position: absolute;
-      /* подбери проценты под свой макет, сейчас ориентир под референс */
+      /* подстройка под макет – при желании можно потом подправить */
       top: 26%;
       left: 50%;
       transform: translateX(-50%);
       width: 42%;
       height: 36%;
-      pointer-events: none; /* чтобы клики проходили дальше */
+      pointer-events: none;
       z-index: 5;
     }
 
@@ -308,8 +310,9 @@
   <div class="app">
     <!-- Верхняя панель -->
     <header class="top-bar">
-      <!-- Кнопка "Назад" ведёт на указанный тобой URL -->
-      <a href="https://mmarmar4028-gif.github.io/kids-site/game_screen.html" class="back-link" id="back-link">
+      <!-- Кнопка "Назад" ведёт на твой экран игры -->
+      <a href="https://mmarmar4028-gif.github.io/kids-site/game_screen.html"
+         class="back-link" id="back-link">
         <span class="back-arrow">←</span>
         <span>Назад</span>
       </a>
@@ -323,11 +326,8 @@
     <!-- Центральная зона: шкаф + монстр + боковые кнопки -->
     <main class="content">
       <div class="wardrobe-wrapper">
-        <!--
-          ВАЖНО:
-          Загрузите в репозиторий картинку шкафа по пути images/wardrobe.png
-        -->
-        <img src="images/wardrobe.png" alt="Шкаф" class="wardrobe-image" />
+        <!-- ВАЖНО: этот файл должен лежать в корне и называться "wardrobe.png" -->
+        <img src="wardrobe.png" alt="Шкаф" class="wardrobe-image" />
 
         <!-- Боковые круглые кнопки слева от шкафа -->
         <div class="side-buttons">
@@ -339,10 +339,7 @@
         </div>
 
         <!-- Область под 3D-монстрика (слой поверх шкафа) -->
-        <!--
-          ВАЖНО:
-          Загрузите models/monster.glb — сюда будет подгружаться модель
-        -->
+        <!-- ВАЖНО: рядом с этим файлом должен лежать "monster.glb" -->
         <div class="monster-wrapper">
           <div id="monster-canvas"></div>
         </div>
@@ -391,19 +388,19 @@
       scene = new THREE.Scene();
 
       const width = monsterContainer.clientWidth;
-      const height = monsterContainer.clientHeight || width; // на случай, если высота ещё 0
+      const height = monsterContainer.clientHeight || width;
 
       camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
       camera.position.set(0, 0.8, 3);
 
       renderer = new THREE.WebGLRenderer({
         antialias: true,
-        alpha: true // прозрачный фон, чтобы был виден шкаф
+        alpha: true
       });
 
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(width, height);
-      renderer.setClearColor(0x000000, 0); // полностью прозрачный фон
+      renderer.setClearColor(0x000000, 0); // прозрачный фон
 
       monsterContainer.appendChild(renderer.domElement);
 
@@ -418,15 +415,15 @@
 
       // -----------------------------
       // ЗАГРУЗКА GLB-МОДЕЛИ МОНСТРИКА
+      // ВАЖНО: файл monster.glb должен лежать в корне рядом с этим HTML
       // -----------------------------
-      // ВАЖНО: файл models/monster.glb должен лежать рядом в репозитории.
       const loader = new THREE.GLTFLoader();
       loader.load(
-        "models/monster.glb",
+        "monster.glb",
         function (gltf) {
           monster = gltf.scene;
 
-          // Чуть подправить позицию и масштаб под "полку" шкафа
+          // Настройка под полку
           monster.position.set(0, -0.6, 0);
           monster.scale.set(1.4, 1.4, 1.4);
 
@@ -456,7 +453,7 @@
     function animate() {
       requestAnimationFrame(animate);
 
-      // Медленное вращение монстрика вокруг оси Y
+      // Медленное вращение монстрика
       if (monster) {
         monster.rotation.y += 0.01;
       }
