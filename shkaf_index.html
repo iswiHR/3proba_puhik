@@ -6,7 +6,7 @@
   <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 
-  <!-- Настройки three.js через import map (один html-файл, без сборки) -->
+  <!-- three.js через import map -->
   <script type="importmap">
   {
     "imports": {
@@ -142,14 +142,20 @@
       z-index: 15;
     }
 
+    /* две кнопки в средней части, одна – внизу, как на макете */
     .side-button-1 {
       left: 18%;
-      top: 38%;
+      top: 36%;
     }
 
     .side-button-2 {
       left: 18%;
       top: 50%;
+    }
+
+    .side-button-3 {
+      left: 18%;
+      top: 70%;
     }
 
     .side-button:hover {
@@ -162,15 +168,15 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    /* Контейнер под 3D-монстра */
+    /* Контейнер под 3D-монстра — центральная секция шкафа */
 
     .monster-container {
       position: absolute;
       left: 50%;
-      top: 56%;          /* чуть ниже центра секции */
+      top: 56%;               /* центр пустой секции */
       transform: translate(-50%, -50%);
-      width: 48%;        /* немного шире */
-      height: 60%;       /* выше, чтобы влезло всё тело */
+      width: 38%;             /* ширина средней колонки */
+      height: 58%;            /* высота центральной области */
       pointer-events: none;
       z-index: 20;
       overflow: visible;
@@ -289,8 +295,6 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) inset;
     }
 
-    /* Немного адаптива под совсем маленькие экраны */
-
     @media (max-width: 380px) {
       .wardrobe-wrapper {
         width: 230px;
@@ -323,6 +327,7 @@
         <!-- Круглые кнопки слева от шкафа -->
         <button class="side-button side-button-1" id="sideButton1"></button>
         <button class="side-button side-button-2" id="sideButton2"></button>
+        <button class="side-button side-button-3" id="sideButton3"></button>
 
         <!-- Контейнер, в который three.js будет рендерить монстрика -->
         <div class="monster-container" id="monsterContainer"></div>
@@ -366,6 +371,7 @@
     const hangerButton = document.getElementById("hangerButton");
     const sideButton1 = document.getElementById("sideButton1");
     const sideButton2 = document.getElementById("sideButton2");
+    const sideButton3 = document.getElementById("sideButton3");
     const coinButton = document.getElementById("coinButton");
     const plusButton = document.getElementById("plusButton");
 
@@ -385,20 +391,24 @@
         "https://mmarmar4028-gif.github.io/kids-site/game_screen.html";
     });
 
-    // Открыть модалку — при клике по иконке вешалки
+    // Плашка по вешалке
     hangerButton.addEventListener("click", () => {
       modal.classList.add("visible");
     });
 
-    // Открыть модалку при клике по одной из боковых кнопок (пусть по второй)
+    // Плашка по одной из боковых кнопок (как просил)
     sideButton2.addEventListener("click", () => {
       console.log("Вторая боковая кнопка нажата");
       modal.classList.add("visible");
     });
 
-    // Первая боковая кнопка — просто лог
+    // Остальные боковые кнопки — просто логи
     sideButton1.addEventListener("click", () => {
       console.log("Первая боковая кнопка нажата");
+    });
+
+    sideButton3.addEventListener("click", () => {
+      console.log("Третья боковая кнопка нажата");
     });
 
     // Закрытие модалки
@@ -406,7 +416,7 @@
     modalCloseButton.addEventListener("click", closeModal);
     modalBackdrop.addEventListener("click", closeModal);
 
-    // Монетка, плюс — просто кликаются
+    // Монетка, плюс — лог
     coinButton.addEventListener("click", () => {
       console.log("Кнопка монет нажата");
     });
@@ -421,8 +431,8 @@
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-    // Чуть выше и дальше, чтобы монстр полностью влезал в центральную секцию
-    camera.position.set(0, 0.5, 2.3);
+    // Чуть выше и дальше, чтобы монстр полностью влез в секцию
+    camera.position.set(0, 0.4, 2.1);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -443,7 +453,7 @@
     resizeRenderer();
     window.addEventListener("resize", resizeRenderer);
 
-    // Немного света, чтобы 3D-монстр выглядел объёмно
+    // Свет
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffcccc, 1.2);
     hemiLight.position.set(0, 1, 0);
     scene.add(hemiLight);
@@ -467,15 +477,28 @@
 
     let monster = null;
 
-    // Файл должен называться monster.glb и лежать рядом с этим html
     gltfLoader.load(
       "monster.glb",
       (gltf) => {
         monster = gltf.scene;
 
-        // Подгонка монстра под центр пустой секции шкафа
-        monster.position.set(0, -0.2, 0);   // чуть выше, чтобы ноги не резались
-        monster.scale.set(0.7, 0.7, 0.7);   // побольше, но чтобы полностью влезал
+        // Автоматически подгоняем монстра под секцию шкафа
+        const box = new THREE.Box3().setFromObject(monster);
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const center = new THREE.Vector3();
+        box.getCenter(center);
+
+        // Центрируем модель в (0,0,0)
+        monster.position.sub(center);
+
+        // Хотим высоту примерно 1.4 условных единицы
+        const targetHeight = 1.4;
+        const scale = targetHeight / size.y;
+        monster.scale.setScalar(scale);
+
+        // Опускаем так, чтобы стоял "на полке"
+        monster.position.y = -targetHeight / 2 + 0.05;
 
         monster.traverse((child) => {
           if (child.isMesh) {
