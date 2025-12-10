@@ -117,7 +117,6 @@
       position: relative;
       width: 260px;
       max-width: 80vw;
-      /* сделаем “айфонную” пропорцию по высоте */
       margin-top: 24px;
     }
 
@@ -144,7 +143,6 @@
     }
 
     .side-button-1 {
-      /* по левому краю средней части шкафа – подгонял “на глаз” */
       left: 18%;
       top: 38%;
     }
@@ -169,12 +167,12 @@
     .monster-container {
       position: absolute;
       left: 50%;
-      top: 51%; /* центр средней “ячейки” шкафа */
+      top: 56%;          /* чуть ниже центра секции */
       transform: translate(-50%, -50%);
-      width: 42%;
-      height: 32%;
-      pointer-events: none; /* клики проходят сквозь монстра */
-      z-index: 20; /* всегда поверх шкафа и кнопок */
+      width: 48%;        /* немного шире */
+      height: 60%;       /* выше, чтобы влезло всё тело */
+      pointer-events: none;
+      z-index: 20;
       overflow: visible;
     }
 
@@ -316,7 +314,6 @@
     <main class="content">
       <div class="wardrobe-wrapper">
         <!-- ШКАФ – картинка. Файл должен лежать рядом с html и называться строго wardrobe.png -->
-        <!-- Если хочешь – можешь поменять путь, НО тогда поменяй и здесь -->
         <img
           src="wardrobe.png"
           alt="Шкаф"
@@ -424,14 +421,15 @@
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-    camera.position.set(0, 0.2, 1.6);
+    // Чуть выше и дальше, чтобы монстр полностью влезал в центральную секцию
+    camera.position.set(0, 0.5, 2.3);
 
     const renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true
     });
     renderer.setPixelRatio(window.devicePixelRatio || 1);
-    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     monsterContainer.appendChild(renderer.domElement);
 
     function resizeRenderer() {
@@ -458,7 +456,6 @@
      * Загрузка DRACO + GLB-модели
      ***********************/
     const dracoLoader = new DRACOLoader();
-    // Берём готовый декодер Draco с серверов Google
     dracoLoader.setDecoderPath(
       "https://www.gstatic.com/draco/versioned/decoders/1.5.6/"
     );
@@ -470,18 +467,16 @@
 
     let monster = null;
 
-    // !!! ВАЖНО !!!
     // Файл должен называться monster.glb и лежать рядом с этим html
     gltfLoader.load(
       "monster.glb",
       (gltf) => {
         monster = gltf.scene;
 
-        // Примерная подгонка монстра под полку шкафа
-        monster.position.set(0, -0.45, 0);
-        monster.scale.set(0.55, 0.55, 0.55);
+        // Подгонка монстра под центр пустой секции шкафа
+        monster.position.set(0, -0.2, 0);   // чуть выше, чтобы ноги не резались
+        monster.scale.set(0.7, 0.7, 0.7);   // побольше, но чтобы полностью влезал
 
-        // Немного сгладим, если надо
         monster.traverse((child) => {
           if (child.isMesh) {
             child.castShadow = false;
@@ -495,7 +490,6 @@
       undefined,
       (error) => {
         console.error("Ошибка при загрузке модели монстрика:", error);
-        // Фоллбек — полукруг, чтобы хоть что-то было видно
         createFallbackMonster();
       }
     );
