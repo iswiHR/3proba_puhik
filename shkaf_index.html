@@ -1,3 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Монстрик в шкафу</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      background: #f5f5f7;
+      color: #111;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      max-width: 375px;     /* ширина айфона */
+      width: 100%;
+      min-height: 100vh;
+      background: #f5f5f7;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Верхняя панель */
+
+    .top-bar {
+      height: 64px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f5f5f7;
+      flex-shrink: 0;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: #111;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .back-arrow {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .hanger-button {
+      border: none;
+      background: none;
+      padding: 6px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .hanger-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Простая иконка-вешалка */
+
+    .hanger-icon {
+      width: 24px;
+      height: 24px;
+      position: relative;
+    }
+
+    .hanger-icon::before,
+    .hanger-icon::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .hanger-icon::before {
+      top: 3px;
+      width: 12px;
+      height: 7px;
+      border: 2px solid #111;
+      border-bottom: none;
+      border-radius: 50% 50% 0 0;
+    }
+
+    .hanger-icon::after {
+      top: 9px;
+      width: 16px;
+      height: 10px;
+      border: 2px solid #111;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+    }
+
+    /* Центральная часть со шкафом */
+
+    .content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0 8px;
+    }
+
+    .wardrobe-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    /* КАРТИНКА ШКАФА – файл wardrobe.png в корне */
+
+    .wardrobe-image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* 3D монстрик (слой поверх шкафа) */
+
+    .monster-wrapper {
+      position: absolute;
+      top: 26%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 42%;
+      height: 36%;
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    #monster-canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #monster-canvas canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    /* Кнопки слева от шкафа */
+
+    .side-buttons {
+      position: absolute;
+      top: 32%;
+      left: 7%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 6;
+    }
+
+    .side-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: #ffffff;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+      cursor: pointer;
+      transform-origin: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .side-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.22);
+    }
+
+    .side-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Нижняя панель (монетка + плюс) */
+
+    .bottom-bar {
+      padding: 12px 24px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #f5f5f7;
+      flex-shrink: 0;
+    }
+
+    .coin-button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 22px;
+      background: #f8e6d8;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .coin-button:active {
+      transform: scale(0.97);
+    }
+
+    .coin-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .plus-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #f8e6d8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .plus-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Модалка "откроется на 5 уровне" */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 50;
+    }
+
+    .modal-backdrop.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 20px 24px;
+      max-width: 280px;
+      width: 80%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .modal-text-main {
+      margin: 0 0 16px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .modal-close-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 26px;
+      background: #ff4b4b;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-close-btn:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Верхняя панель -->
+    <header class="top-bar">
+      <a href="https://mmarmar4028-gif.github.io/kids-site/game_screen.html"
+         class="back-link" id="back-link">
+        <span class="back-arrow">←</span>
+        <span>Назад</span>
+      </a>
+
+      <button class="hanger-button" id="hanger-btn" aria-label="Вешалка">
+        <div class="hanger-icon"></div>
+      </button>
+    </header>
+
+    <!-- Центральная зона -->
+    <main class="content">
+      <div class="wardrobe-wrapper">
+        <img src="wardrobe.png" alt="Шкаф" class="wardrobe-image" />
+
+        <div class="side-buttons">
+          <button class="side-button" id="side-btn-1"></button>
+          <button class="side-button" id="side-btn-2"></button>
+        </div>
+
+        <div class="monster-wrapper">
+          <div id="monster-canvas"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Нижняя панель -->
+    <footer class="bottom-bar">
+      <button class="coin-button" id="coin-btn">
+        <span class="coin-amount">30</span>
+        <span class="coin-icon">◎</span>
+      </button>
+      <button class="plus-button" id="plus-btn">+</button>
+    </footer>
+  </div>
+
+  <!-- Модальное окно -->
+  <div class="modal-backdrop" id="locked-modal">
+    <div class="modal">
+      <p class="modal-text-main">
+        откроется на 5 уровне! ждем тебя, совсем скоро!
+      </p>
+      <button class="modal-close-btn" id="modal-close-btn">понятно</button>
+    </div>
+  </div>
+
   <!-- Three.js и GLTFLoader -->
   <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
   <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -7,22 +361,8 @@
     // 3D СЦЕНА
     // -----------------------------
 
-    let scene, camera, renderer;
-    let monster = null;
-    let fallbackMonster = null;
-    let monsterContainer = null;
-
-    function createFallbackMonster() {
-      // если уже есть — не создаём второй
-      if (fallbackMonster) return;
-
-      const geometry = new THREE.SphereGeometry(0.7, 32, 32);
-      const material = new THREE.MeshStandardMaterial({ color: 0xff3030 });
-      fallbackMonster = new THREE.Mesh(geometry, material);
-      fallbackMonster.position.set(0, -0.2, 0);
-      scene.add(fallbackMonster);
-      console.warn("Используем запасного красного монстра вместо GLB");
-    }
+    let scene, camera, renderer, monster;
+    let monsterContainer;
 
     function initThree() {
       monsterContainer = document.getElementById("monster-canvas");
@@ -47,6 +387,7 @@
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.setSize(width, height);
       renderer.setClearColor(0x000000, 0); // прозрачный фон
+
       monsterContainer.appendChild(renderer.domElement);
 
       // Свет
@@ -58,62 +399,31 @@
       dirLight.position.set(2, 2, 2);
       scene.add(dirLight);
 
-      // -----------------------------
-      // ЗАГРУЗКА GLB С ОТЛАДКОЙ
-      // -----------------------------
+      // Загрузка GLB
       const loader = new THREE.GLTFLoader();
-
-      fetch("monster.glb")
-        .then((response) => {
-          console.log(
-            "monster.glb статус:",
-            response.status,
-            response.statusText
-          );
-          console.log("monster.glb content-type:", response.headers.get("content-type"));
-          return response.arrayBuffer();
-        })
-        .then((buffer) => {
-          console.log("monster.glb размер (байт):", buffer.byteLength);
-
-          // если вдруг прилетело что-то подозрительно маленькое — сразу fallback
-          if (buffer.byteLength < 1000) {
-            console.error("monster.glb слишком маленький, похоже, битый файл");
-            createFallbackMonster();
-            animate();
-            return;
-          }
-
-          loader.parse(
-            buffer,
-            "",
-            function (gltf) {
-              console.log("GLB успешно распарсен");
-              monster = gltf.scene;
-              monster.position.set(0, -0.6, 0);
-              monster.scale.set(1.4, 1.4, 1.4);
-
-              // если был шарик-запаска — убираем его
-              if (fallbackMonster) {
-                scene.remove(fallbackMonster);
-                fallbackMonster = null;
-              }
-
-              scene.add(monster);
-              animate();
-            },
-            function (error) {
-              console.error("GLTFLoader.parse выдал ошибку:", error);
-              createFallbackMonster();
-              animate();
-            }
-          );
-        })
-        .catch((error) => {
-          console.error("fetch monster.glb упал с ошибкой:", error);
-          createFallbackMonster();
+      loader.load(
+        "monster.glb",
+        function (gltf) {
+          console.log("GLB успешно загружен");
+          monster = gltf.scene;
+          monster.position.set(0, -0.6, 0);
+          monster.scale.set(1.4, 1.4, 1.4);
+          scene.add(monster);
           animate();
-        });
+        },
+        undefined,
+        function (error) {
+          console.error("Ошибка при загрузке модели монстрика:", error);
+
+          // ФОЛЛБЕК: если файл битый – рисуем красный «шар-монстра»
+          const geometry = new THREE.SphereGeometry(0.7, 32, 32);
+          const material = new THREE.MeshStandardMaterial({ color: 0xff3030 });
+          monster = new THREE.Mesh(geometry, material);
+          monster.position.set(0, -0.2, 0);
+          scene.add(monster);
+          animate();
+        }
+      );
 
       window.addEventListener("resize", onWindowResize);
     }
@@ -135,15 +445,12 @@
       if (monster) {
         monster.rotation.y += 0.01;
       }
-      if (fallbackMonster) {
-        fallbackMonster.rotation.y += 0.01;
-      }
 
       renderer.render(scene, camera);
     }
 
     // -----------------------------
-    // UI: модалка и кнопки (оставил как было)
+    // UI: модалка и кнопки
     // -----------------------------
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -190,3 +497,5 @@
 
     window.addEventListener("load", initThree);
   </script>
+</body>
+</html>
