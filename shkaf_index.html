@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Монстрик в шкафу</title>
   <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+        content="width=375, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
 
   <!-- three.js через import map -->
   <script type="importmap">
@@ -29,32 +29,32 @@
         "Helvetica Neue", Arial, sans-serif;
       background: #f5f5f7;
       color: #111;
-    }
-
-    button {
-      border: none;
-      background: none;
-      padding: 0;
-      font: inherit;
-      cursor: pointer;
-    }
-
-    .app {
-      min-height: 100vh;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
+      min-height: 100vh;
+    }
+
+    /* "Телефон" 375×812 */
+    .phone {
+      position: relative;
+      width: 375px;
+      height: 812px;
+      background: #f5f5f7;
+      overflow: hidden;
     }
 
     /* Верхняя панель */
-
     .top-bar {
+      position: absolute;
+      left: 0;
+      top: 0;
       width: 100%;
-      max-width: 375px;
-      padding: 16px 20px 0;
+      height: 144px; /* серый верх, как на макете */
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
+      padding: 16px 20px 0;
     }
 
     .back-button {
@@ -62,11 +62,14 @@
       align-items: center;
       gap: 6px;
       color: #111;
-      font-size: 14px;
+      font-size: 16px;
+      cursor: pointer;
+      background: none;
+      border: none;
     }
 
     .back-arrow {
-      font-size: 16px;
+      font-size: 18px;
       transform: translateY(-1px);
     }
 
@@ -79,6 +82,7 @@
       align-items: center;
       justify-content: center;
       background: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
     }
 
     .hanger-icon {
@@ -103,36 +107,28 @@
       border-left-color: transparent;
     }
 
-    /* Контент с шкафом */
-
-    .content {
-      flex: 1;
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      padding: 24px 0 80px;
-    }
-
+    /* Шкаф: 375×518, строго по центру */
     .wardrobe-wrapper {
-      position: relative;
-      width: 260px;
-      max-width: 80vw;
-      margin-top: 24px;
+      position: absolute;
+      left: 0;
+      top: 144px;
+      width: 375px;
+      height: 518px;
     }
 
     .wardrobe-image {
-      display: block;
       width: 100%;
-      height: auto;
-      border-radius: 12px;
+      height: 100%;
+      display: block;
+      border-radius: 0;
+      object-fit: cover;
     }
 
-    /* Кнопки слева от шкафа */
-
+    /* Три белые кнопки слева (привязаны к шкафу) */
     .side-button {
       position: absolute;
-      width: 26px;
-      height: 26px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: #ffffff;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.18);
@@ -142,21 +138,10 @@
       z-index: 15;
     }
 
-    /* две кнопки в средней части, одна – внизу, как на макете */
-    .side-button-1 {
-      left: 18%;
-      top: 36%;
-    }
-
-    .side-button-2 {
-      left: 18%;
-      top: 50%;
-    }
-
-    .side-button-3 {
-      left: 18%;
-      top: 70%;
-    }
+    /* координаты относительно ЛЕВОГО ВЕРХНЕГО УГЛА ШКАФА (top:144) */
+    .side-button-1 { left: 64px; top: 180px; }  /* на уровне верхней одежды */
+    .side-button-2 { left: 64px; top: 255px; }
+    .side-button-3 { left: 64px; top: 360px; }  /* низ, как в макете */
 
     .side-button:hover {
       transform: scale(1.1);
@@ -168,15 +153,17 @@
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
-    /* Контейнер под 3D-монстра — центральная секция шкафа */
-
+    /* Контейнер под 3D-монстра
+       ВНИМАНИЕ: размеры и позиция по ТВОИМ цифрам
+       ширина 187, высота 280
+       отступ слева 96, сверху 304 от всего экрана 375×812
+    */
     .monster-container {
       position: absolute;
-      left: 50%;
-      top: 56%;               /* центр пустой секции */
-      transform: translate(-50%, -50%);
-      width: 38%;             /* ширина средней колонки */
-      height: 58%;            /* высота центральной области */
+      left: 96px;
+      top: 304px;
+      width: 187px;
+      height: 280px;
       pointer-events: none;
       z-index: 20;
       overflow: visible;
@@ -189,31 +176,27 @@
     }
 
     /* Нижняя панель с монеткой */
-
     .bottom-panel {
-      position: fixed;
-      left: 50%;
+      position: absolute;
+      left: 0;
       bottom: 24px;
-      transform: translateX(-50%);
       width: 100%;
-      max-width: 375px;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 16px;
-      pointer-events: none;
     }
 
     .coin-button {
-      pointer-events: auto;
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 10px 22px;
       border-radius: 999px;
       background: #f7d9b8;
-      font-size: 14px;
+      font-size: 16px;
       box-shadow: 0 4px 9px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
     }
 
     .coin-icon {
@@ -228,7 +211,6 @@
     }
 
     .round-button {
-      pointer-events: auto;
       width: 32px;
       height: 32px;
       border-radius: 50%;
@@ -236,14 +218,14 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
+      font-size: 20px;
       box-shadow: 0 4px 9px rgba(0, 0, 0, 0.15);
+      cursor: pointer;
     }
 
-    /* Модальное окно “откроется на 5 уровне” */
-
+    /* Модалка “откроется на 5 уровне” */
     .modal {
-      position: fixed;
+      position: absolute;
       inset: 0;
       display: none;
       align-items: center;
@@ -288,22 +270,18 @@
       background: #ff4b4b;
       color: #fff;
       font-size: 14px;
+      cursor: pointer;
     }
 
     .modal-close-button:active {
       transform: translateY(1px);
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) inset;
     }
-
-    @media (max-width: 380px) {
-      .wardrobe-wrapper {
-        width: 230px;
-      }
-    }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div class="phone">
+    <!-- Верх -->
     <header class="top-bar">
       <button class="back-button" id="backButton">
         <span class="back-arrow">←</span>
@@ -315,26 +293,20 @@
       </button>
     </header>
 
-    <main class="content">
-      <div class="wardrobe-wrapper">
-        <!-- ШКАФ – картинка. Файл должен лежать рядом с html и называться строго wardrobe.png -->
-        <img
-          src="wardrobe.png"
-          alt="Шкаф"
-          class="wardrobe-image"
-        />
+    <!-- Шкаф -->
+    <div class="wardrobe-wrapper">
+      <img src="wardrobe.png" alt="Шкаф" class="wardrobe-image" />
 
-        <!-- Круглые кнопки слева от шкафа -->
-        <button class="side-button side-button-1" id="sideButton1"></button>
-        <button class="side-button side-button-2" id="sideButton2"></button>
-        <button class="side-button side-button-3" id="sideButton3"></button>
+      <!-- три круглых кнопки слева -->
+      <button class="side-button side-button-1" id="sideButton1"></button>
+      <button class="side-button side-button-2" id="sideButton2"></button>
+      <button class="side-button side-button-3" id="sideButton3"></button>
+    </div>
 
-        <!-- Контейнер, в который three.js будет рендерить монстрика -->
-        <div class="monster-container" id="monsterContainer"></div>
-      </div>
-    </main>
+    <!-- Контейнер монстра -->
+    <div class="monster-container" id="monsterContainer"></div>
 
-    <!-- Нижняя плашка с монеткой -->
+    <!-- Нижняя плашка -->
     <div class="bottom-panel">
       <button class="coin-button" id="coinButton">
         <span class="coin-text">30</span>
@@ -342,16 +314,16 @@
       </button>
       <button class="round-button" id="plusButton">+</button>
     </div>
-  </div>
 
-  <!-- Модалка “откроется на 5 уровне! ждём тебя, совсем скоро!” -->
-  <div class="modal" id="lockedModal">
-    <div class="modal-backdrop"></div>
-    <div class="modal-window">
-      <p class="modal-text">
-        откроется на 5 уровне! ждем тебя, совсем скоро!
-      </p>
-      <button class="modal-close-button" id="modalCloseButton">понятно</button>
+    <!-- Модалка -->
+    <div class="modal" id="lockedModal">
+      <div class="modal-backdrop"></div>
+      <div class="modal-window">
+        <p class="modal-text">
+          откроется на 5 уровне! ждем тебя, совсем скоро!
+        </p>
+        <button class="modal-close-button" id="modalCloseButton">понятно</button>
+      </div>
     </div>
   </div>
 
@@ -374,7 +346,6 @@
     const sideButton3 = document.getElementById("sideButton3");
     const coinButton = document.getElementById("coinButton");
     const plusButton = document.getElementById("plusButton");
-
     const monsterContainer = document.getElementById("monsterContainer");
 
     const modal = document.getElementById("lockedModal");
@@ -384,25 +355,20 @@
     /***********************
      * Обработчики интерфейса
      ***********************/
-
-    // Кнопка "Назад"
     backButton.addEventListener("click", () => {
       window.location.href =
         "https://mmarmar4028-gif.github.io/kids-site/game_screen.html";
     });
 
-    // Плашка по вешалке
     hangerButton.addEventListener("click", () => {
       modal.classList.add("visible");
     });
 
-    // Плашка по одной из боковых кнопок (как просил)
     sideButton2.addEventListener("click", () => {
       console.log("Вторая боковая кнопка нажата");
       modal.classList.add("visible");
     });
 
-    // Остальные боковые кнопки — просто логи
     sideButton1.addEventListener("click", () => {
       console.log("Первая боковая кнопка нажата");
     });
@@ -411,12 +377,10 @@
       console.log("Третья боковая кнопка нажата");
     });
 
-    // Закрытие модалки
     const closeModal = () => modal.classList.remove("visible");
     modalCloseButton.addEventListener("click", closeModal);
     modalBackdrop.addEventListener("click", closeModal);
 
-    // Монетка, плюс — лог
     coinButton.addEventListener("click", () => {
       console.log("Кнопка монет нажата");
     });
@@ -431,7 +395,6 @@
     const scene = new THREE.Scene();
 
     const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
-    // Чуть выше и дальше, чтобы монстр полностью влез в секцию
     camera.position.set(0, 0.4, 2.1);
 
     const renderer = new THREE.WebGLRenderer({
@@ -443,8 +406,8 @@
     monsterContainer.appendChild(renderer.domElement);
 
     function resizeRenderer() {
-      const width = monsterContainer.clientWidth || 200;
-      const height = monsterContainer.clientHeight || 200;
+      const width = monsterContainer.clientWidth || 187;
+      const height = monsterContainer.clientHeight || 280;
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
@@ -453,7 +416,6 @@
     resizeRenderer();
     window.addEventListener("resize", resizeRenderer);
 
-    // Свет
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffcccc, 1.2);
     hemiLight.position.set(0, 1, 0);
     scene.add(hemiLight);
@@ -482,22 +444,20 @@
       (gltf) => {
         monster = gltf.scene;
 
-        // Автоматически подгоняем монстра под секцию шкафа
+        // Нормализуем модель: центр в (0,0,0), масштаб по высоте
         const box = new THREE.Box3().setFromObject(monster);
         const size = new THREE.Vector3();
         box.getSize(size);
         const center = new THREE.Vector3();
         box.getCenter(center);
 
-        // Центрируем модель в (0,0,0)
         monster.position.sub(center);
 
-        // Хотим высоту примерно 1.4 условных единицы
-        const targetHeight = 1.4;
+        const targetHeight = 1.4; // "рост" монстра в мировых координатах
         const scale = targetHeight / size.y;
         monster.scale.setScalar(scale);
 
-        // Опускаем так, чтобы стоял "на полке"
+        // Опустить так, чтобы стоял "на полке"
         monster.position.y = -targetHeight / 2 + 0.05;
 
         monster.traverse((child) => {
@@ -513,20 +473,8 @@
       undefined,
       (error) => {
         console.error("Ошибка при загрузке модели монстрика:", error);
-        createFallbackMonster();
       }
     );
-
-    // Фоллбек-монстрик, если с .glb что-то не так
-    function createFallbackMonster() {
-      const geom = new THREE.SphereGeometry(0.5, 32, 32, 0, Math.PI);
-      const mat = new THREE.MeshStandardMaterial({
-        color: 0xff4b4b
-      });
-      const fallback = new THREE.Mesh(geom, mat);
-      fallback.position.set(0, -0.3, 0);
-      scene.add(fallback);
-    }
 
     /***********************
      * Анимация — монстрик крутится по Y
