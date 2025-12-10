@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Монстрик в шкафу</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      background: #f5f5f7;
+      color: #111;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+    }
+
+    .app {
+      max-width: 375px;           /* ширина айфона */
+      width: 100%;
+      min-height: 100vh;
+      background: #f5f5f7;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Верхняя панель */
+
+    .top-bar {
+      height: 64px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f5f5f7;
+      flex-shrink: 0;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: #111;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .back-arrow {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .hanger-button {
+      border: none;
+      background: none;
+      padding: 6px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .hanger-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Простая иконка-вешалка */
+
+    .hanger-icon {
+      width: 24px;
+      height: 24px;
+      position: relative;
+    }
+
+    .hanger-icon::before,
+    .hanger-icon::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    .hanger-icon::before {
+      top: 3px;
+      width: 12px;
+      height: 7px;
+      border: 2px solid #111;
+      border-bottom: none;
+      border-radius: 50% 50% 0 0;
+    }
+
+    .hanger-icon::after {
+      top: 9px;
+      width: 16px;
+      height: 10px;
+      border: 2px solid #111;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+    }
+
+    /* Центральная часть со шкафом */
+
+    .content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 0 8px;
+    }
+
+    .wardrobe-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    /* -------------------------------
+       КАРТИНКА ШКАФА
+       ЗАГРУЗИ images/wardrobe.png
+       -------------------------------- */
+
+    .wardrobe-image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    /* 3D монстрик (слой поверх шкафа) */
+
+    .monster-wrapper {
+      position: absolute;
+      /* подбери проценты под свой макет, сейчас ориентир под референс */
+      top: 26%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 42%;
+      height: 36%;
+      pointer-events: none; /* чтобы клики проходили дальше */
+      z-index: 5;
+    }
+
+    #monster-canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    #monster-canvas canvas {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    /* Кнопки слева от шкафа */
+
+    .side-buttons {
+      position: absolute;
+      top: 32%;
+      left: 7%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      z-index: 6;
+    }
+
+    .side-button {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: none;
+      background: #ffffff;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.18);
+      cursor: pointer;
+      transform-origin: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .side-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.22);
+    }
+
+    .side-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Нижняя панель (монетка + плюс) */
+
+    .bottom-bar {
+      padding: 12px 24px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #f5f5f7;
+      flex-shrink: 0;
+    }
+
+    .coin-button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 22px;
+      background: #f8e6d8;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .coin-button:active {
+      transform: scale(0.97);
+    }
+
+    .coin-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .plus-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: #f8e6d8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    .plus-button:active {
+      transform: scale(0.95);
+    }
+
+    /* Модалка "откроется на 5 уровне" */
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 50;
+    }
+
+    .modal-backdrop.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 20px 24px;
+      max-width: 280px;
+      width: 80%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .modal-text-main {
+      margin: 0 0 16px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .modal-close-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 26px;
+      background: #ff4b4b;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-close-btn:active {
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Верхняя панель -->
+    <header class="top-bar">
+      <!-- Кнопка "Назад" ведёт на указанный тобой URL -->
+      <a href="https://mmarmar4028-gif.github.io/kids-site/game_screen.html" class="back-link" id="back-link">
+        <span class="back-arrow">←</span>
+        <span>Назад</span>
+      </a>
+
+      <!-- Кнопка-вешалка открывает модалку -->
+      <button class="hanger-button" id="hanger-btn" aria-label="Вешалка">
+        <div class="hanger-icon"></div>
+      </button>
+    </header>
+
+    <!-- Центральная зона: шкаф + монстр + боковые кнопки -->
+    <main class="content">
+      <div class="wardrobe-wrapper">
+        <!--
+          ВАЖНО:
+          Загрузите в репозиторий картинку шкафа по пути images/wardrobe.png
+        -->
+        <img src="images/wardrobe.png" alt="Шкаф" class="wardrobe-image" />
+
+        <!-- Боковые круглые кнопки слева от шкафа -->
+        <div class="side-buttons">
+          <!-- Эта кнопка ОТКРЫВАЕТ модалку -->
+          <button class="side-button" id="side-btn-1"></button>
+
+          <!-- Вторая кнопка просто логирует клик -->
+          <button class="side-button" id="side-btn-2"></button>
+        </div>
+
+        <!-- Область под 3D-монстрика (слой поверх шкафа) -->
+        <!--
+          ВАЖНО:
+          Загрузите models/monster.glb — сюда будет подгружаться модель
+        -->
+        <div class="monster-wrapper">
+          <div id="monster-canvas"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Нижняя панель -->
+    <footer class="bottom-bar">
+      <button class="coin-button" id="coin-btn">
+        <span class="coin-amount">30</span>
+        <span class="coin-icon">◎</span>
+      </button>
+      <button class="plus-button" id="plus-btn">+</button>
+    </footer>
+  </div>
+
+  <!-- Модальное окно "откроется на 5 уровне" -->
+  <div class="modal-backdrop" id="locked-modal">
+    <div class="modal">
+      <p class="modal-text-main">
+        откроется на 5 уровне! ждем тебя, совсем скоро!
+      </p>
+      <button class="modal-close-btn" id="modal-close-btn">понятно</button>
+    </div>
+  </div>
+
+  <!-- Three.js и GLTFLoader (через CDN) -->
+  <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <script>
+    // -----------------------------
+    // 3D СЦЕНА: инициализация Three.js
+    // -----------------------------
+
+    let scene, camera, renderer, monster;
+    let monsterContainer;
+
+    function initThree() {
+      monsterContainer = document.getElementById("monster-canvas");
+      if (!monsterContainer) {
+        console.error("Не найден контейнер для монстрика");
+        return;
+      }
+
+      scene = new THREE.Scene();
+
+      const width = monsterContainer.clientWidth;
+      const height = monsterContainer.clientHeight || width; // на случай, если высота ещё 0
+
+      camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 100);
+      camera.position.set(0, 0.8, 3);
+
+      renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true // прозрачный фон, чтобы был виден шкаф
+      });
+
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(width, height);
+      renderer.setClearColor(0x000000, 0); // полностью прозрачный фон
+
+      monsterContainer.appendChild(renderer.domElement);
+
+      // Свет
+      const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
+      hemiLight.position.set(0, 1, 0);
+      scene.add(hemiLight);
+
+      const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+      dirLight.position.set(2, 2, 2);
+      scene.add(dirLight);
+
+      // -----------------------------
+      // ЗАГРУЗКА GLB-МОДЕЛИ МОНСТРИКА
+      // -----------------------------
+      // ВАЖНО: файл models/monster.glb должен лежать рядом в репозитории.
+      const loader = new THREE.GLTFLoader();
+      loader.load(
+        "models/monster.glb",
+        function (gltf) {
+          monster = gltf.scene;
+
+          // Чуть подправить позицию и масштаб под "полку" шкафа
+          monster.position.set(0, -0.6, 0);
+          monster.scale.set(1.4, 1.4, 1.4);
+
+          scene.add(monster);
+          animate();
+        },
+        undefined,
+        function (error) {
+          console.error("Ошибка при загрузке модели монстрика:", error);
+        }
+      );
+
+      window.addEventListener("resize", onWindowResize);
+    }
+
+    function onWindowResize() {
+      if (!monsterContainer || !renderer || !camera) return;
+
+      const width = monsterContainer.clientWidth;
+      const height = monsterContainer.clientHeight || width;
+
+      renderer.setSize(width, height);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Медленное вращение монстрика вокруг оси Y
+      if (monster) {
+        monster.rotation.y += 0.01;
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    // -----------------------------
+    // ЛОГИКА UI: модалки, клики по кнопкам
+    // -----------------------------
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const hangerBtn = document.getElementById("hanger-btn");
+      const sideBtn1 = document.getElementById("side-btn-1");
+      const sideBtn2 = document.getElementById("side-btn-2");
+      const coinBtn = document.getElementById("coin-btn");
+      const plusBtn = document.getElementById("plus-btn");
+
+      const modalBackdrop = document.getElementById("locked-modal");
+      const modalCloseBtn = document.getElementById("modal-close-btn");
+
+      function openLockedModal() {
+        modalBackdrop.classList.add("visible");
+      }
+
+      function closeLockedModal() {
+        modalBackdrop.classList.remove("visible");
+      }
+
+      // Клик по вешалке — открывает плашку
+      hangerBtn.addEventListener("click", openLockedModal);
+
+      // Одна из боковых кнопок слева — тоже открывает плашку
+      sideBtn1.addEventListener("click", openLockedModal);
+
+      // Вторая боковая кнопка — просто логирует клик
+      sideBtn2.addEventListener("click", function () {
+        console.log("Вторая боковая кнопка нажата");
+      });
+
+      // Закрытие модалки по кнопке "понятно"
+      modalCloseBtn.addEventListener("click", closeLockedModal);
+
+      // Закрытие модалки по клику на фон вокруг
+      modalBackdrop.addEventListener("click", function (event) {
+        if (event.target === modalBackdrop) {
+          closeLockedModal();
+        }
+      });
+
+      // Низ: монетка и плюс — клики с заглушками
+      coinBtn.addEventListener("click", function () {
+        console.log("Кнопка монет нажата");
+      });
+
+      plusBtn.addEventListener("click", function () {
+        console.log("Кнопка '+' нажата");
+      });
+    });
+
+    // Запускаем 3D после полной загрузки страницы
+    window.addEventListener("load", initThree);
+  </script>
+</body>
+</html>
